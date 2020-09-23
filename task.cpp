@@ -6,11 +6,11 @@ Task::Task(unsigned int timeCost_in, unsigned int timePeriod_in)
 : mTimeCost(timeCost_in), mTimePeriod(timePeriod_in)
 {}
 
-unsigned int Task::getTimeCost()
+unsigned int Task::getTimeCost() const
 {
     return mTimeCost;
 }
-unsigned int Task::getTimePeriod()
+unsigned int Task::getTimePeriod() const
 {
     return mTimePeriod;
 }

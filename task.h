@@ -10,8 +10,8 @@ protected:
 public:
     Task(unsigned int timeCost_in, unsigned int timePeriod_in);
 
-    unsigned int getTimeCost();
-    unsigned int getTimePeriod();
+    unsigned int getTimeCost() const;
+    unsigned int getTimePeriod() const;
 
     virtual void execute() = 0;
 

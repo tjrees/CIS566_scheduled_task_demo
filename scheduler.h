@@ -8,6 +8,10 @@ class Scheduler
 {
 private:
     std::vector<Task *> mTasks;
+    std::vector<Task *> mSchedule;
+
+    void printSchedule() const;
+    void createSchedule();
 
 public:
     bool addTask(Task * taskToAdd);

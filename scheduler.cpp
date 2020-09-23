@@ -1,9 +1,38 @@
 #include <cmath>
 #include <iostream>
+#include <queue>
 
 #include "scheduler.h"
 #include "task.h"
+#include "taskComparator.h"
 
+// HELPER FUNCTIONS //
+
+// Recursive helper to find greatest common denominator
+static int gcd(int a, int b)
+{
+    if (b == 0)
+    {
+        return a;
+    }
+    if (a == 0)
+    {
+        return b;
+    }
+    if (a == b)
+    {
+        return a;
+    }
+    return gcd(b, a % b);
+}
+
+// Helper to find least common multiple, calls gcd
+static int lcm(int a, int b)
+{
+    return (a * b) / gcd(a, b);
+}
+
+// PUBLIC MEMBER FUNCTIONS //
 bool Scheduler::addTask(Task * taskToAdd)
 {
     size_t numTotalTasks = mTasks.size() + 1U;
@@ -24,13 +53,13 @@ bool Scheduler::addTask(Task * taskToAdd)
 
     if (load <= utilization)
     {
-        std::cout << " Added task to schedule.\n";
+        std::cout << " Added task to list.\n";
         mTasks.push_back(taskToAdd);
         return true;
     }
     else
     {
-        std::cout << " Did not add task to schedule.\n";
+        std::cout << " Did not add task to list.\n";
         return false;
     }
 }
@@ -43,6 +72,14 @@ void Scheduler::clearTasks()
 // TODO: Do better than just running tasks in series.
 void Scheduler::runTasks(unsigned int cycles)
 {
+    // No need to do anything if there are no tasks
+    if (mTasks.empty())
+    {
+        return;
+    }
+    // First, schedule tasks.
+    createSchedule();
+
     for (unsigned int cycleNum = 0; cycleNum < cycles; cycleNum++)
     {
         for (size_t i = 0; i < mTasks.size(); i++)
@@ -50,5 +87,79 @@ void Scheduler::runTasks(unsigned int cycles)
             std::cout << "Scheduler executing task " << i << "\n";
             mTasks[i]->execute();
         }
+    }
+}
+
+// PRIVATE MEMBER FUNCTIONS //
+
+void Scheduler::printSchedule() const
+{
+    // TODO: remove print statement
+    std::cout << "| ";
+    for (size_t i = 0; i < mSchedule.size(); i++)
+    {
+        if (mSchedule[i] == nullptr)
+        {
+            std::cout << "NULL | ";
+        }
+        else
+        {
+            std::cout << static_cast<void*>(mSchedule[i]) << " | ";
+        }
+    }
+    std::cout << "\n";
+}
+
+// Assumes there is at least one task to schedule
+void Scheduler::createSchedule()
+{
+    int scheduleSize = mTasks[0]->getTimePeriod();
+    // Find LCM of time period across all tasks
+    for (size_t i = 1; i < mTasks.size(); i++)
+    {
+        scheduleSize = lcm(scheduleSize, mTasks[i]->getTimePeriod());
+    }
+
+    mSchedule.resize(scheduleSize, nullptr);
+
+    std::priority_queue<Task *, std::vector<Task *>, TaskComparator> taskQueue;
+    for (size_t i = 0; i < mTasks.size(); i++)
+    {
+        taskQueue.push(mTasks[i]);
+    }
+
+    while (!taskQueue.empty())
+    {
+        Task * toSchedule = taskQueue.top();
+        std::cout << "Attempting to schedule task: " << static_cast<void*>(toSchedule) << "\n";
+
+        // Since the schedule is of size LCM, we need to schedule each task exactly (LCM / timePeriod) times.
+        for (int period = 0; period < (scheduleSize / toSchedule->getTimePeriod()); period++)
+        {
+            int slicesAllotted = 0;
+            // Try to start scheduling at the very beginning of this task's time period.
+            for (int slice = (toSchedule->getTimePeriod() * period); 
+                 slice < (toSchedule->getTimePeriod() * (period + 1));
+                 slice++)
+            {
+                if (mSchedule[slice] == nullptr)
+                {
+                    mSchedule[slice] = toSchedule;
+                    slicesAllotted++;
+                    if (slicesAllotted >= toSchedule->getTimeCost())
+                    {
+                        break;
+                    }
+                }
+            }
+            if (slicesAllotted < toSchedule->getTimeCost())
+            {
+                // The calculation done while adding tasks should ensure that this does not happen
+                throw std::runtime_error("Could not schedule task - not enough time slices");
+            }
+        }
+        // Pop and move to the next task, or finish.
+        printSchedule();
+        taskQueue.pop();
     }
 }
