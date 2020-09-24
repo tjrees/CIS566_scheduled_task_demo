@@ -7,13 +7,13 @@ int main()
 {
     Scheduler scheduler;
 
-    SimpleTask A(3, 20);
-    SimpleTask B(2, 5);
-    SimpleTask C(2, 10);
+    SimpleTask workOut(2, 24, "Going to the gym");
+    SimpleTask eatFood(1, 6, "Eating a meal");
+    SimpleTask takeNap(4, 12, "Taking a nap");
 
-    scheduler.addTask(&A);
-    scheduler.addTask(&B);
-    scheduler.addTask(&C);
+    scheduler.addTask(&workOut);
+    scheduler.addTask(&eatFood);
+    scheduler.addTask(&takeNap);
 
     scheduler.runTasks(1);
 

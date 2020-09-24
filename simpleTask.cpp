@@ -4,16 +4,16 @@
 
 #include "simpleTask.h"
 
-SimpleTask::SimpleTask(unsigned int timeCost_in, unsigned int timePeriod_in)
-: Task(timeCost_in, timePeriod_in) {}
+SimpleTask::SimpleTask(unsigned int timeCost_in, unsigned int timePeriod_in, std::string blurb_in)
+: Task(timeCost_in, timePeriod_in), mBlurb(blurb_in) {}
 
-void SimpleTask::execute()
+void SimpleTask::execute(size_t startTime, size_t endTime)
 {
-    std::cout << "Simple task starting\n";
-    for (unsigned int i = 0; i < mTimeCost - 1; i++)
+    std::cout << "Task started: " << mBlurb << " from timestamp " << startTime << " to " << endTime << "\n";
+    for(size_t i = startTime; i < endTime; i++)
     {
-        std::cout << "Simple task executing " << i << "\n";
+        this->trackProgress(i);
         sleep(1);
     }
-    std::cout << "Simple task ending\n";
+    std::cout << "Returning to scheduler\n";
 }

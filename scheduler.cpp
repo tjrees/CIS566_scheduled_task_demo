@@ -1,6 +1,7 @@
 #include <cmath>
 #include <iostream>
 #include <queue>
+#include <unistd.h>
 
 #include "scheduler.h"
 #include "task.h"
@@ -42,6 +43,10 @@ bool Scheduler::addTask(Task * taskToAdd)
     double load = 0;
     for (size_t i = 0U; i < mTasks.size(); i++)
     {
+        if (mTasks[i] == taskToAdd)
+        {
+            throw std::runtime_error("Cannot schedule the same task twice");
+        }
         load += static_cast<double>(mTasks[i]->getTimeCost()) / 
             static_cast<double>(mTasks[i]->getTimePeriod());
     }
@@ -82,10 +87,33 @@ void Scheduler::runTasks(unsigned int cycles)
 
     for (unsigned int cycleNum = 0; cycleNum < cycles; cycleNum++)
     {
-        for (size_t i = 0; i < mTasks.size(); i++)
+        size_t timeOffset = mSchedule.size() * cycleNum;
+        size_t timeStamp = 0;
+        while (timeStamp < mSchedule.size())
         {
-            std::cout << "Scheduler executing task " << i << "\n";
-            mTasks[i]->execute();
+            Task * toRun = mSchedule[timeStamp];
+            size_t startTime = timeStamp;
+            if (toRun != nullptr)
+            {
+                while (timeStamp < mSchedule.size())
+                {
+                    if (mSchedule[timeStamp] != toRun)
+                    {
+                        break;
+                    }
+                    timeStamp++;
+                }
+                toRun->execute(startTime + timeOffset, timeStamp + timeOffset);
+            }
+            else
+            {
+                // Increment past any null time slices without running anything
+                // For simulation, sleep for a second.
+                timeStamp++;
+                std::cout << "No task scheduled at timestamp " << timeStamp + timeOffset << " - sleeping\n";
+                sleep(1);
+            }
+            
         }
     }
 }
@@ -94,7 +122,6 @@ void Scheduler::runTasks(unsigned int cycles)
 
 void Scheduler::printSchedule() const
 {
-    // TODO: remove print statement
     std::cout << "| ";
     for (size_t i = 0; i < mSchedule.size(); i++)
     {
@@ -159,7 +186,7 @@ void Scheduler::createSchedule()
             }
         }
         // Pop and move to the next task, or finish.
-        printSchedule();
+        //printSchedule();
         taskQueue.pop();
     }
 }
