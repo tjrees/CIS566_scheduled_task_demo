@@ -10,9 +10,12 @@ private:
     std::string mBlurb;
 
 public:
-    SimpleTask(unsigned int timeCost_in, unsigned int timePeriod_in, std::string blurb_in);
-    virtual void execute(size_t startTime, size_t endTime);
+    SimpleTask(unsigned int timeCost_in, 
+               unsigned int timePeriod_in, 
+               std::string blurb_in);
 
+    virtual void execute(size_t startTime, 
+                         size_t endTime);
 };
 
 #endif // __SIMPLE_TASK_H__

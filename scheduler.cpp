@@ -36,12 +36,12 @@ static int lcm(int a, int b)
 // PUBLIC MEMBER FUNCTIONS //
 bool Scheduler::addTask(Task * taskToAdd)
 {
-    size_t numTotalTasks = mTasks.size() + 1U;
+    size_t numTotalTasks = mTasks.size() + 1;
     double utilization = static_cast<double>(numTotalTasks) * 
         (std::pow(2.0, (1.0 / static_cast<double>(numTotalTasks))) - 1.0);
 
     double load = 0;
-    for (size_t i = 0U; i < mTasks.size(); i++)
+    for (size_t i = 0; i < mTasks.size(); i++)
     {
         if (mTasks[i] == taskToAdd)
         {
@@ -74,7 +74,6 @@ void Scheduler::clearTasks()
     mTasks.clear();
 }
 
-// TODO: Do better than just running tasks in series.
 void Scheduler::runTasks(unsigned int cycles)
 {
     // No need to do anything if there are no tasks
@@ -113,7 +112,6 @@ void Scheduler::runTasks(unsigned int cycles)
                 std::cout << "No task scheduled at timestamp " << timeStamp + timeOffset << " - sleeping\n";
                 sleep(1);
             }
-            
         }
     }
 }
@@ -146,7 +144,6 @@ void Scheduler::createSchedule()
     {
         scheduleSize = lcm(scheduleSize, mTasks[i]->getTimePeriod());
     }
-
     mSchedule.resize(scheduleSize, nullptr);
 
     std::priority_queue<Task *, std::vector<Task *>, TaskComparator> taskQueue;

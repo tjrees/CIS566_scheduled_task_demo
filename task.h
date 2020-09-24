@@ -24,7 +24,6 @@ public:
     unsigned int getTimePeriod() const;
 
     virtual void execute(size_t startTime, size_t endTime) = 0;
-
 };
 
 #endif // __TASK_H__
